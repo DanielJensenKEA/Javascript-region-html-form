@@ -33,10 +33,10 @@ async function postRegion(region) {
 }
 
 function createRegion(){
-    const kommune ={};
-    kommune.kode = "8899";
-    kommune.navn = "KEAxxx";
-    kommune.href = "http:kea";
-    return kommune;
+    const region ={};
+    region.kode = "8899";
+    region.navn = "KEAxxx";
+    region.href = "http:kea";
+    return region;
 }
 
