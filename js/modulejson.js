@@ -1,4 +1,3 @@
-
 async function postObjectAsJson(url, object, httpVerbum) {
     const objectAsJsonString = JSON.stringify(object);
     console.log(objectAsJsonString);
@@ -18,6 +17,21 @@ function fetchAnyUrl(url) {
         .catch(error => console.error("Handled error xx: ", error)));
 }
 
+function sortTable(kommuner) {
+    //arr.sort((kom1, kom2) => (kom1 > kom2) ? 1 : -1);
+    return kommuner.sort((kom1, kom2) => {
+        if (kom1.region.kode > kom2.region.kode) {
+            return 1
+        } else if (kom2.region.kode > kom1.region.kode) {
+            return -1
+        } else if (kom1.navn > kom2.navn) {
+            return 1
+        } else {
+            return -1
+        }
+    })
+}
+
 async function restDelete(url) {
     const fetchOptions = {
         method: "DELETE",
@@ -27,8 +41,8 @@ async function restDelete(url) {
         body: ""
     }
     const response = await fetch(url, fetchOptions);
+    console.log("Response from restDelete: " + response)
     return response;
-
 }
 
-export {postObjectAsJson, fetchAnyUrl, restDelete}
+export {postObjectAsJson, fetchAnyUrl, restDelete, sortTable}

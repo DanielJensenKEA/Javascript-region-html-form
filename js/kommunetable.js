@@ -1,4 +1,4 @@
-import {fetchAnyUrl, restDelete} from "./modulejson.js";
+import {fetchAnyUrl, restDelete, sortTable} from "./modulejson.js";
 
 console.log("Jeg er i kommunetable");
 
@@ -42,8 +42,10 @@ function actionGetKommuner() {
 }
 async function fetchKommuner() {
     kommuner = await fetchAnyUrl(urlKommune);
+    sortTable(kommuner)
     if (kommuner) {
         kommuner.forEach(createTable);
+
     } else {
         alert("Fejl ved kald til backend url="+urlKommune+". Vil du vide mere kig i Console(F12)")
     }
@@ -53,6 +55,7 @@ async function deleteKommuneFromDB(kommune) {
         const url = urlKommuneEndpoint+kommune.kode;
         console.log("Delete request for url: "+url)
         const resp = await restDelete(url)
+        console.log("Response deleteKommuneFromDB: "+resp)
         const body = await resp.text();
         alert(body)
     }catch(error) {
