@@ -1,4 +1,4 @@
-import {fetchAnyUrl} from "./modulejson.js";
+import {fetchAnyUrl, restDelete} from "./modulejson.js";
 
 console.log("Jeg er i kommunetable");
 
@@ -6,6 +6,7 @@ let pressedHentKommunerFlag = false;
 const urlKommune = "http://localhost:8080/getkommuner";
 const pbCreateKommuneTable = document.getElementById("pbGetKommuner");
 const tblKommuner = document.getElementById("tblKommuner");
+const urlKommuneEndpoint = "http://localhost:8080/kommune/"
 
 let kommuner = [];
 
@@ -47,8 +48,21 @@ async function fetchKommuner() {
         alert("Fejl ved kald til backend url="+urlKommune+". Vil du vide mere kig i Console(F12)")
     }
 }
-function deleteKommuneFromDB(kommune) {
-    const url = `http://localhost:8080/${kommune.kode}`
+async function deleteKommuneFromDB(kommune) {
+    try {
+        const url = urlKommuneEndpoint+kommune.kode;
+        console.log("Delete request for url: "+url)
+        const resp = await restDelete(url)
+        const body = await resp.text();
+        alert(body)
+    }catch(error) {
+        alert(error.message);
+        console.log(error)
+    }
+
+    /*
+    const url = `http://localhost:8080/kommune/${kommune.kode}`
+    console.log("Sending delete request to: "+url)
 
     return fetch(url, {
         method: "DELETE",
@@ -64,6 +78,8 @@ function deleteKommuneFromDB(kommune) {
     })
         .then(data => console.log("Success: ", data))
         .catch(error => console.error("Error deleting kommune:", error));
+
+     */
 }
 function createTable(kommune) {
     let cellCount = 0;
@@ -88,13 +104,28 @@ function createTable(kommune) {
     pbDelete.type = "button";
     pbDelete.setAttribute("value", "Slet Kommune");
     cell.appendChild(pbDelete);
-    pbDelete.className="btn1"
-    pbDelete.onclick = function() {
+    pbDelete.className = "btn1"
+
+    pbDelete.onclick = function () {
         document.getElementById(kommune.navn).remove();
         deleteKommuneFromDB(kommune);
-        console.log("Deleted: "+kommune.navn)
+
+
+        /*
+        deleteKommuneFromDB(kommune)
+            .then(() =>
+                document.getElementById(kommune.navn).remove())
+            .catch(error => console.error("Error deleting kommune:", error));
+
+         */
+/*
+        console.log("Deleted: " + kommune.navn)
+        document.getElementById(kommune.navn).remove();
+        deleteKommuneFromDB(kommune);
+
+ */
+
     }
-    console.log(row);
 }
 
 
