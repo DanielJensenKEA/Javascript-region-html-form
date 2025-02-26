@@ -1,37 +1,21 @@
-import {fetchAnyUrl, restDelete, sortTable} from "./modulejson.js";
+import {fetchAnyUrl, fetchRegioner, restDelete, sortTable} from "./modulejson.js";
 
 console.log("Jeg er i kommunetable");
 
 let pressedHentKommunerFlag = false;
 const urlKommune = "http://localhost:8080/getkommuner";
+const urlKommuneLocal = "http://localhost:8080/getlocalkommuner"
 const pbCreateKommuneTable = document.getElementById("pbGetKommuner");
 const tblKommuner = document.getElementById("tblKommuner");
 const urlKommuneEndpoint = "http://localhost:8080/kommune/"
+const sortButton = document.getElementById("sortKomButton")
+
 
 let kommuner = [];
+let regMap = new Map();
 
-//document.addEventListener('DOMContentLoaded', getAllRegionerAndKommuner)
 pbCreateKommuneTable.addEventListener('click', actionGetKommuner)
 
-
-/*
-function getAllRegionerAndKommuner() {
-    const regionerUrl = "http://localhost:8080/getregioner";
-    const kommunerUrl = "http://localhost:8080/getkommuner";
-
-    Promise.all([
-        fetch(regionerUrl, {method: "GET"}),
-        fetch(kommunerUrl, {method : "GET"})
-    ])
-        .then(responses => Promise.all(responses.map(res => res.text())))
-        .then(data => {
-            console.log("Regions response:",data[0])
-            console.log("Kommuner response:",data[1])
-        })
-        .catch(error => console.error("Error fetching: "+error))
-}
-
- */
 function actionGetKommuner() {
     if (!pressedHentKommunerFlag) {
         fetchKommuner();
@@ -41,13 +25,16 @@ function actionGetKommuner() {
     }
 }
 async function fetchKommuner() {
-    kommuner = await fetchAnyUrl(urlKommune);
+    //kommuner = await fetchAnyUrl(urlKommune);
+    const url = urlKommuneLocal //Hvis vi henter kommuner fra den åbne api vil den overskrive vores entities og overskrive lokale ændringer såsom hrefphoto som vi ville sætte i MySQL.
+    console.log("fetchKommuner() url: "+url);
+    regMap = await fetchRegioner();
+    kommuner = await fetchAnyUrl(url)
     sortTable(kommuner)
     if (kommuner) {
         kommuner.forEach(createTable);
-
     } else {
-        alert("Fejl ved kald til backend url="+urlKommune+". Vil du vide mere kig i Console(F12)")
+        alert("Fejl ved kald til backend url="+url+". Vil du vide mere kig i Console(F12)")
     }
 }
 async function deleteKommuneFromDB(kommune) {
@@ -96,12 +83,40 @@ function createTable(kommune) {
     cell.innerHTML = kommune.navn;
     cell = row.insertCell(cellCount++);
     cell.innerHTML = kommune.href;
+
+    //IMAGE
+    cell = row.insertCell(cellCount++);
+    let img = document.createElement("img");
+    console.log("hrefPhoto: "+kommune.hrefPhoto);
+    img.setAttribute("src", kommune.hrefPhoto);
+    img.setAttribute("alt", "hej");
+    img.setAttribute("width", 150);
+    img.setAttribute("height", 150);
+    cell.appendChild(img);
+
+    //REGION
+    cell = row.insertCell(cellCount++);
+    const dropdown = document.createElement("select");
+    dropdown.id = "ddRegion"+kommune.kode;
+    regMap.forEach(reg => {
+        const element = document.createElement("option");
+        element.textContent = reg.navn;
+        element.value = reg.kode;
+        element.region = reg;
+        dropdown.append(element);
+    })
+    cell.appendChild(dropdown);
+
+    /*
     cell = row.insertCell(cellCount++);
     cell.innerHTML = kommune.region.kode;
     cell = row.insertCell(cellCount++);
     cell.innerHTML = kommune.region.navn;
+     */
+
     row.id = kommune.navn;
 
+    //DELETE BUTTON
     cell = row.insertCell(cellCount++);
     const pbDelete = document.createElement('input');
     pbDelete.type = "button";
@@ -112,22 +127,21 @@ function createTable(kommune) {
     pbDelete.onclick = function () {
         document.getElementById(kommune.navn).remove();
         deleteKommuneFromDB(kommune);
+    }
 
-
-        /*
-        deleteKommuneFromDB(kommune)
-            .then(() =>
-                document.getElementById(kommune.navn).remove())
-            .catch(error => console.error("Error deleting kommune:", error));
-
-         */
-/*
-        console.log("Deleted: " + kommune.navn)
-        document.getElementById(kommune.navn).remove();
-        deleteKommuneFromDB(kommune);
-
- */
-
+    //UPDATE BUTTON
+    cell = row.insertCell(cellCount++);
+    const pbUpdate = document.createElement("input");
+    pbUpdate.type = "button";
+    pbUpdate.setAttribute("value", "Update Kommune");
+    pbUpdate.className = "btn1";
+    cell.appendChild(pbUpdate);
+    pbUpdate.onclick = function() {
+        console.log(dropdown)
+        console.log(dropdown.selectedIndex)
+        console.log(dropdown.value)
+        kommune.region.kode = dropdown.value;
+        console.log(kommune)
     }
 }
 

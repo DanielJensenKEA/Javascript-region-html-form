@@ -1,3 +1,5 @@
+
+const urlRegioner = "http://localhost:8080/getregionerlocal"
 async function postObjectAsJson(url, object, httpVerbum) {
     const objectAsJsonString = JSON.stringify(object);
     console.log(objectAsJsonString);
@@ -44,5 +46,12 @@ async function restDelete(url) {
     console.log("Response from restDelete: " + response)
     return response;
 }
+// REGIONER
+const regioner = await fetchAnyUrl(urlRegioner);
+const regionMap = new Map();
+async function fetchRegioner() {
+    regioner.forEach(region => regionMap.set(region.navn, region))
+    return regionMap
+}
 
-export {postObjectAsJson, fetchAnyUrl, restDelete, sortTable}
+export {postObjectAsJson, fetchAnyUrl, restDelete, sortTable, fetchRegioner}
