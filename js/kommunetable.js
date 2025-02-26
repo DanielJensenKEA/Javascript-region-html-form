@@ -1,4 +1,4 @@
-import {fetchAnyUrl, fetchRegioner, restDelete, sortTable} from "./modulejson.js";
+import {fetchAnyUrl, fetchRegioner, postObjectAsJson, restDelete, sortTable} from "./modulejson.js";
 
 console.log("Jeg er i kommunetable");
 
@@ -49,27 +49,15 @@ async function deleteKommuneFromDB(kommune) {
         alert(error.message);
         console.log(error)
     }
-
-    /*
+}
+async function updateKommuneInDB(kommune) {
     const url = `http://localhost:8080/kommune/${kommune.kode}`
-    console.log("Sending delete request to: "+url)
-
-    return fetch(url, {
-        method: "DELETE",
-        headers: {
-            "Content-Type": "application/json",
-        },
-    })
-        .then(response => {
-        if (!response.ok) {
-            throw new Error (`Error: ${response.status} - ${response.statusText}`);
-        }
-        return response.text();
-    })
-        .then(data => console.log("Success: ", data))
-        .catch(error => console.error("Error deleting kommune:", error));
-
-     */
+    const response = await postObjectAsJson(url, kommune, "PUT");
+    if (response.ok) {
+        console.log("Kommune updated")
+    } else {
+        console.error("Failed to update kommune", response);
+    }
 }
 function createTable(kommune) {
     let cellCount = 0;
@@ -142,6 +130,7 @@ function createTable(kommune) {
         console.log(dropdown.value)
         kommune.region.kode = dropdown.value;
         console.log(kommune)
+        updateKommuneInDB(kommune);
     }
 }
 
